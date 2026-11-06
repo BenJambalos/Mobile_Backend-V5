@@ -1,0 +1,22 @@
+# Secrets - never commit these
+.env
+*.env
+!.env.example
+
+# Dependencies / build output
+node_modules/
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+*.iml
+.idea/
+.gradle/
+local.properties
+
+# OS junk
+.DS_Store
+Thumbs.db

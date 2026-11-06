@@ -1,0 +1,127 @@
+
+======================================================================
+TABLE: accounts
+  account_id                   INT                                                     NOT NULL AUTO_INCREMENT
+  username                     VARCHAR(50)                                             NOT NULL
+  password_hash                VARCHAR(255)                                            NOT NULL
+  role                         ENUM('admin', 'farm_owner')                             NOT NULL DEFAULT 'farm_owner'
+  status                       ENUM('active', 'disabled', 'suspended')                 DEFAULT 'active'
+  created_at                   TIMESTAMP_F                                             DEFAULT CURRENT_TIMESTAMP
+  updated_at                   TIMESTAMP_F                                             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+======================================================================
+TABLE: activity_logs
+  log_id                       BIGINT                                                  NOT NULL AUTO_INCREMENT
+  account_id                   INT                                                     NOT NULL
+  action_type                  VARCHAR(50)                                             NOT NULL
+  action_description           TEXT                                                    DEFAULT NULL
+  logged_at                    TIMESTAMP_F                                             DEFAULT CURRENT_TIMESTAMP
+  FK fk_activity_logs_account: ['account_id'] -> accounts(['account_id'])  ON DELETE CASCADE ON UPDATE CASCADE
+
+======================================================================
+TABLE: aquaculture_farms
+  farm_id                      INT                                                     NOT NULL AUTO_INCREMENT
+  owner_id                     INT                                                     NOT NULL
+  farm_name                    VARCHAR(100)                                            NOT NULL
+  street                       VARCHAR(100)                                            DEFAULT NULL
+  barangay                     VARCHAR(100)                                            DEFAULT NULL
+  municipality                 VARCHAR(100)                                            DEFAULT NULL
+  province                     VARCHAR(100)                                            DEFAULT NULL
+  zip_code                     VARCHAR(10)                                             DEFAULT NULL
+  location                     TEXT                                                    DEFAULT NULL
+  created_at                   TIMESTAMP_F                                             DEFAULT CURRENT_TIMESTAMP
+  updated_at                   TIMESTAMP_F                                             DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  FK fk_aquaculture_farms_owner: ['owner_id'] -> accounts(['account_id'])  ON DELETE CASCADE ON UPDATE CASCADE
+
+======================================================================
+TABLE: device_maintenance
+  maintenance_id               INT                                                     NOT NULL AUTO_INCREMENT
+  device_id                    INT                                                     NOT NULL
+  description                  TEXT                                                    DEFAULT NULL
+  performed_at                 TIMESTAMP_F                                             DEFAULT CURRENT_TIMESTAMP
+  FK fk_device_maintenance_device: ['device_id'] -> monitoring_devices(['device_id'])  ON DELETE CASCADE ON UPDATE CASCADE
+
+======================================================================
+TABLE: device_status
+  status_id                    BIGINT                                                  NOT NULL AUTO_INCREMENT
+  device_id                    INT                                                     NOT NULL
+  battery_percentage           DECIMAL(5,2)                                            DEFAULT NULL
+  is_charging                  TINYINT(1,0)                                            DEFAULT '0'
+  connectivity_status          ENUM('online', 'offline', 'weak')                       DEFAULT 'online'
+  signal_strength              VARCHAR(20)                                             DEFAULT NULL
+  active_sensors_count         INT                                                     DEFAULT '0'
+  recorded_at                  TIMESTAMP_F                                             DEFAULT CURRENT_TIMESTAMP
+  FK fk_device_status_device: ['device_id'] -> monitoring_devices(['device_id'])  ON DELETE CASCADE ON UPDATE CASCADE
+
+======================================================================
+TABLE: early_warning_notifications
+  notification_id              BIGINT                                                  NOT NULL AUTO_INCREMENT
+  farm_id                      INT                                                     NOT NULL
+  alert_level                  ENUM('low', 'medium', 'high', 'critical')               NOT NULL
+  alert_message                TEXT                                                    NOT NULL
+  estimated_arrival_time       TIMESTAMP_F                                             DEFAULT NULL
+  is_resolved                  TINYINT(1,0)                                            DEFAULT '0'
+  created_at                   TIMESTAMP_F                                             DEFAULT CURRENT_TIMESTAMP
+  FK fk_early_warnings_farm: ['farm_id'] -> aquaculture_farms(['farm_id'])  ON DELETE CASCADE ON UPDATE CASCADE
+
+======================================================================
+TABLE: monitoring_devices
+  device_id                    INT                                                     NOT NULL AUTO_INCREMENT
+  farm_id                      INT                                                     NOT NULL
+  pond_id                      INT                                                     DEFAULT NULL
+  device_name                  VARCHAR(100)                                            NOT NULL
+  status                       ENUM('active', 'inactive', 'maintenance')               DEFAULT 'active'
+  installed_at                 TIMESTAMP_F                                             DEFAULT CURRENT_TIMESTAMP
+  FK fk_monitoring_devices_farm: ['farm_id'] -> aquaculture_farms(['farm_id'])  ON DELETE CASCADE ON UPDATE CASCADE
+  FK fk_monitoring_devices_pond: ['pond_id'] -> ponds(['pond_id'])  ON DELETE SET NULL ON UPDATE CASCADE
+
+======================================================================
+TABLE: parameter_thresholds
+  threshold_id                 INT                                                     NOT NULL AUTO_INCREMENT
+  farm_id                      INT                                                     NOT NULL
+  parameter                    ENUM('temperature', 'ph', 'dissolved_oxygen', 'salinity') NOT NULL
+  min_value                    DECIMAL(6,2)                                            DEFAULT NULL
+  max_value                    DECIMAL(6,2)                                            DEFAULT NULL
+  created_at                   TIMESTAMP_F                                             DEFAULT CURRENT_TIMESTAMP
+  FK fk_parameter_thresholds_farm: ['farm_id'] -> aquaculture_farms(['farm_id'])  ON DELETE CASCADE ON UPDATE CASCADE
+
+======================================================================
+TABLE: ponds
+  pond_id                      INT                                                     NOT NULL AUTO_INCREMENT
+  farm_id                      INT                                                     NOT NULL
+  pond_name                    VARCHAR(100)                                            NOT NULL
+  volume                       DECIMAL(10,2)                                           DEFAULT NULL
+  created_at                   TIMESTAMP_F                                             DEFAULT CURRENT_TIMESTAMP
+  FK fk_ponds_farm: ['farm_id'] -> aquaculture_farms(['farm_id'])  ON DELETE CASCADE ON UPDATE CASCADE
+
+======================================================================
+TABLE: user_profiles
+  user_id                      INT                                                     NOT NULL AUTO_INCREMENT
+  account_id                   INT                                                     NOT NULL
+  first_name                   VARCHAR(50)                                             NOT NULL
+  middle_name                  VARCHAR(50)                                             DEFAULT NULL
+  last_name                    VARCHAR(50)                                             NOT NULL
+  email                        VARCHAR(100)                                            NOT NULL
+  phone                        VARCHAR(20)                                             DEFAULT NULL
+  FK fk_user_profiles_account: ['account_id'] -> accounts(['account_id'])  ON DELETE CASCADE ON UPDATE CASCADE
+
+======================================================================
+TABLE: water_quality_forecasts
+  forecast_id                  BIGINT                                                  NOT NULL AUTO_INCREMENT
+  farm_id                      INT                                                     NOT NULL
+  parameter                    ENUM('temperature', 'ph', 'dissolved_oxygen', 'salinity') NOT NULL
+  forecast_value               DECIMAL(6,2)                                            NOT NULL
+  predicted_for                TIMESTAMP_F                                             NOT NULL
+  created_at                   TIMESTAMP_F                                             DEFAULT CURRENT_TIMESTAMP
+  FK fk_water_quality_forecasts_farm: ['farm_id'] -> aquaculture_farms(['farm_id'])  ON DELETE CASCADE ON UPDATE CASCADE
+
+======================================================================
+TABLE: water_quality_readings
+  reading_id                   BIGINT                                                  NOT NULL AUTO_INCREMENT
+  device_id                    INT                                                     NOT NULL
+  temperature                  DECIMAL(5,2)                                            DEFAULT NULL
+  ph_level                     DECIMAL(4,2)                                            DEFAULT NULL
+  dissolved_oxygen             DECIMAL(5,2)                                            DEFAULT NULL
+  salinity                     DECIMAL(5,2)                                            DEFAULT NULL
+  recorded_at                  TIMESTAMP_F                                             DEFAULT CURRENT_TIMESTAMP
+  FK fk_water_quality_readings_device: ['device_id'] -> monitoring_devices(['device_id'])  ON DELETE CASCADE ON UPDATE CASCADE
