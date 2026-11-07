@@ -23,7 +23,7 @@ const pool = mysql.createPool({
 // FROM_UNIXTIME() and TIMESTAMP columns all agree no matter how the MySQL
 // server itself is configured. (Display in Philippine time is done in
 // utils/time.js, never by shifting stored data.)
-pool.pool.on('connection', (connection) => {
+pool.on('connection', (connection) => {
   connection.query("SET time_zone = '+08:00'");
 });
 
