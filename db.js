@@ -14,7 +14,7 @@ const pool = mysql.createPool({
   dateStrings: false,
   // Instants are exchanged with MySQL as UTC. Without this mysql2 converts
   // using the Node process's own zone, which differs between a laptop and Railway.
-  timezone: '+08:00',
+  timezone: 'Z',
   decimalNumbers: true, // return DECIMAL columns as JS numbers, not strings
   charset: 'utf8mb4',   // without this, special characters like ≥ get mangled
 });
@@ -23,8 +23,8 @@ const pool = mysql.createPool({
 // FROM_UNIXTIME() and TIMESTAMP columns all agree no matter how the MySQL
 // server itself is configured. (Display in Philippine time is done in
 // utils/time.js, never by shifting stored data.)
-pool.on('connection', (connection) => {
-  connection.query("SET time_zone = '+08:00'");
+pool.pool.on('connection', (connection) => {
+  connection.query("SET time_zone = '+00:00'");
 });
 
 module.exports = pool;
